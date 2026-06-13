@@ -14,13 +14,6 @@ env:
   TF_VAR_backend_container: "{{.BACKEND_CONTAINER}}"
 
 tasks:
-  bootstrap:
-    desc: "Create the tfstate storage account (run once before anything else)"
-    dir: bootstrap
-    cmds:
-      - tofu init
-      - tofu apply -lock=false
-
   hub:plan:
     desc: "Plan DNS resolver and private DNS zone links in the hub VNet"
     dir: hub
@@ -100,6 +93,29 @@ tasks:
     cmds:
       - tofu init {{.BACKEND_ARGS}} -backend-config="key=nonprod/terraform.tfstate"
       - tofu apply
+
+  bootstrap:plan:
+    desc: "Plan flux-system namespace and cluster-vars ConfigMap on prod and nonprod"
+    dir: bootstrap
+    cmds:
+      - tofu init {{.BACKEND_ARGS}} -backend-config="key=bootstrap/terraform.tfstate"
+      - tofu plan
+
+  bootstrap:apply:
+    desc: "Apply flux-system namespace and cluster-vars ConfigMap on prod and nonprod"
+    dir: bootstrap
+    cmds:
+      - tofu init {{.BACKEND_ARGS}} -backend-config="key=bootstrap/terraform.tfstate"
+      - tofu apply
+
+  up:
+    desc: "Provision everything from scratch: hub → shared → prod → nonprod → bootstrap"
+    cmds:
+      - task: hub:apply
+      - task: shared:apply
+      - task: prod:apply
+      - task: nonprod:apply
+      - task: bootstrap:apply
 
   nonprod:destroy:
     desc: "Destroy the nonprod AKS cluster (does not touch prod or shared resources)"

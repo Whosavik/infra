@@ -93,6 +93,22 @@ task nonprod:plan
 task nonprod:apply
 ```
 
+### Bootstrap GitOps
+
+Creates the `flux-system` namespace and a `cluster-vars` ConfigMap on both clusters.
+Run this **before** `flux bootstrap` — Flux will take ownership of the namespace after.
+
+```bash
+task bootstrap:plan
+task bootstrap:apply
+```
+
+## Easy mode (don't forget first-time setup)
+
+```bash
+task up
+```
+
 ## Getting kubeconfig
 
 ```bash
