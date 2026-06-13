@@ -1,0 +1,116 @@
+version: '3'
+
+dotenv: ['.env']
+
+vars:
+  BACKEND_ARGS: >-
+    -backend-config="resource_group_name={{.BACKEND_RG}}"
+    -backend-config="storage_account_name={{.BACKEND_SA}}"
+    -backend-config="container_name={{.BACKEND_CONTAINER}}"
+
+env:
+  TF_VAR_backend_rg: "{{.BACKEND_RG}}"
+  TF_VAR_backend_sa: "{{.BACKEND_SA}}"
+  TF_VAR_backend_container: "{{.BACKEND_CONTAINER}}"
+
+tasks:
+  bootstrap:
+    desc: "Create the tfstate storage account (run once before anything else)"
+    dir: bootstrap
+    cmds:
+      - tofu init
+      - tofu apply -lock=false
+
+  hub:plan:
+    desc: "Plan DNS resolver and private DNS zone links in the hub VNet"
+    dir: hub
+    cmds:
+      - tofu init {{.BACKEND_ARGS}} -backend-config="key=hub/terraform.tfstate"
+      - tofu plan
+
+  hub:apply:
+    desc: "Apply DNS resolver and private DNS zone links in the hub VNet"
+    dir: hub
+    cmds:
+      - tofu init {{.BACKEND_ARGS}} -backend-config="key=hub/terraform.tfstate"
+      - tofu apply
+
+  shared:plan:
+    desc: "Plan shared resources (ACR)"
+    dir: shared
+    cmds:
+      - tofu init {{.BACKEND_ARGS}} -backend-config="key=shared/terraform.tfstate"
+      - tofu plan
+
+  shared:apply:
+    desc: "Apply shared resources (ACR)"
+    dir: shared
+    cmds:
+      - tofu init {{.BACKEND_ARGS}} -backend-config="key=shared/terraform.tfstate"
+      - tofu apply
+
+  prod:plan:
+    desc: "Plan prod AKS cluster and spoke VNet"
+    dir: prod
+    env:
+      TF_VAR_vm_size: "{{.PROD_VM_SIZE}}"
+      TF_VAR_min_nodes: "{{.PROD_MIN_NODES}}"
+      TF_VAR_max_nodes: "{{.PROD_MAX_NODES}}"
+      TF_VAR_vnet_address_space: "{{.TF_VAR_prod_vnet_address_space}}"
+      TF_VAR_node_subnet_prefix: "{{.TF_VAR_prod_node_subnet_prefix}}"
+    cmds:
+      - tofu init {{.BACKEND_ARGS}} -backend-config="key=prod/terraform.tfstate"
+      - tofu plan
+
+  prod:apply:
+    desc: "Apply prod AKS cluster and spoke VNet"
+    dir: prod
+    env:
+      TF_VAR_vm_size: "{{.PROD_VM_SIZE}}"
+      TF_VAR_min_nodes: "{{.PROD_MIN_NODES}}"
+      TF_VAR_max_nodes: "{{.PROD_MAX_NODES}}"
+      TF_VAR_vnet_address_space: "{{.TF_VAR_prod_vnet_address_space}}"
+      TF_VAR_node_subnet_prefix: "{{.TF_VAR_prod_node_subnet_prefix}}"
+    cmds:
+      - tofu init {{.BACKEND_ARGS}} -backend-config="key=prod/terraform.tfstate"
+      - tofu apply
+
+  nonprod:plan:
+    desc: "Plan nonprod AKS cluster and spoke VNet"
+    dir: nonprod
+    env:
+      TF_VAR_vm_size: "{{.NONPROD_VM_SIZE}}"
+      TF_VAR_min_nodes: "{{.NONPROD_MIN_NODES}}"
+      TF_VAR_max_nodes: "{{.NONPROD_MAX_NODES}}"
+      TF_VAR_vnet_address_space: "{{.TF_VAR_nonprod_vnet_address_space}}"
+      TF_VAR_node_subnet_prefix: "{{.TF_VAR_nonprod_node_subnet_prefix}}"
+    cmds:
+      - tofu init {{.BACKEND_ARGS}} -backend-config="key=nonprod/terraform.tfstate"
+      - tofu plan
+
+  nonprod:apply:
+    desc: "Apply nonprod AKS cluster and spoke VNet"
+    dir: nonprod
+    env:
+      TF_VAR_vm_size: "{{.NONPROD_VM_SIZE}}"
+      TF_VAR_min_nodes: "{{.NONPROD_MIN_NODES}}"
+      TF_VAR_max_nodes: "{{.NONPROD_MAX_NODES}}"
+      TF_VAR_vnet_address_space: "{{.TF_VAR_nonprod_vnet_address_space}}"
+      TF_VAR_node_subnet_prefix: "{{.TF_VAR_nonprod_node_subnet_prefix}}"
+    cmds:
+      - tofu init {{.BACKEND_ARGS}} -backend-config="key=nonprod/terraform.tfstate"
+      - tofu apply
+
+  nonprod:destroy:
+    desc: "Destroy the nonprod AKS cluster (does not touch prod or shared resources)"
+    prompt: "This will destroy the nonprod cluster and its spoke VNet. Continue?"
+    dir: nonprod
+    env:
+      TF_VAR_vm_size: "{{.NONPROD_VM_SIZE}}"
+      TF_VAR_min_nodes: "{{.NONPROD_MIN_NODES}}"
+      TF_VAR_max_nodes: "{{.NONPROD_MAX_NODES}}"
+      TF_VAR_vnet_address_space: "{{.TF_VAR_nonprod_vnet_address_space}}"
+      TF_VAR_node_subnet_prefix: "{{.TF_VAR_nonprod_node_subnet_prefix}}"
+    cmds:
+      - tofu init {{.BACKEND_ARGS}} -backend-config="key=nonprod/terraform.tfstate"
+      - tofu destroy
