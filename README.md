@@ -101,6 +101,7 @@ az aks get-credentials --resource-group rg-prod --name aks-prod
 
 # Nonprod
 az aks get-credentials --resource-group rg-nonprod --name aks-nonprod
+```
 
 ### Destroying nonprod
 
