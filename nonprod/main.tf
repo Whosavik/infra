@@ -93,7 +93,7 @@ resource "azurerm_federated_identity_credential" "aso" {
   user_assigned_identity_id = azurerm_user_assigned_identity.aso.id
   audience            = ["api://AzureADTokenExchange"]
   issuer              = module.aks.oidc_issuer_url
-  subject             = "system:serviceaccount:azureserviceoperator-system:azureserviceoperator"
+  subject             = "system:serviceaccount:azureserviceoperator-system:azureserviceoperator-default"
 }
 
 resource "azurerm_role_assignment" "aso_contributor" {
@@ -115,7 +115,7 @@ resource "azurerm_federated_identity_credential" "eso" {
   user_assigned_identity_id = azurerm_user_assigned_identity.eso.id
   audience            = ["api://AzureADTokenExchange"]
   issuer              = module.aks.oidc_issuer_url
-  subject             = "system:serviceaccount:external-secrets:external-secrets"
+  subject             = "system:serviceaccount:external-secrets:external-secrets-external-secrets"
 }
 
 resource "azurerm_role_assignment" "eso_kv_secrets_user" {
