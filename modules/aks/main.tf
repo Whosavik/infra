@@ -17,6 +17,9 @@ resource "azurerm_kubernetes_cluster" "main" {
     os_disk_size_gb             = 128
   }
 
+  oidc_issuer_enabled       = true
+  workload_identity_enabled = true
+
   identity {
     type = "SystemAssigned"
   }

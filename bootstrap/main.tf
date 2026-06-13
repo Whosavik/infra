@@ -45,8 +45,12 @@ resource "kubernetes_config_map" "cluster_vars_nonprod" {
   data = {
     ACR_HOST              = data.terraform_remote_state.nonprod.outputs.acr_login_server
     AZURE_SUBSCRIPTION_ID = data.azurerm_client_config.current.subscription_id
+    AZURE_TENANT_ID       = data.azurerm_client_config.current.tenant_id
     AZURE_RESOURCE_GROUP  = data.terraform_remote_state.nonprod.outputs.resource_group_name
     AZURE_LOCATION        = data.terraform_remote_state.nonprod.outputs.location
+    ASO_CLIENT_ID         = data.terraform_remote_state.nonprod.outputs.aso_client_id
+    ESO_CLIENT_ID         = data.terraform_remote_state.nonprod.outputs.eso_client_id
+    KEY_VAULT_URI         = data.terraform_remote_state.nonprod.outputs.key_vault_uri
   }
 }
 
@@ -75,7 +79,11 @@ resource "kubernetes_config_map" "cluster_vars_prod" {
   data = {
     ACR_HOST              = data.terraform_remote_state.prod.outputs.acr_login_server
     AZURE_SUBSCRIPTION_ID = data.azurerm_client_config.current.subscription_id
+    AZURE_TENANT_ID       = data.azurerm_client_config.current.tenant_id
     AZURE_RESOURCE_GROUP  = data.terraform_remote_state.prod.outputs.resource_group_name
     AZURE_LOCATION        = data.terraform_remote_state.prod.outputs.location
+    ASO_CLIENT_ID         = data.terraform_remote_state.prod.outputs.aso_client_id
+    ESO_CLIENT_ID         = data.terraform_remote_state.prod.outputs.eso_client_id
+    KEY_VAULT_URI         = data.terraform_remote_state.prod.outputs.key_vault_uri
   }
 }

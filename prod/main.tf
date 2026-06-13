@@ -79,3 +79,47 @@ module "aks" {
     environment = "prod"
   }
 }
+
+# ASO
+
+resource "azurerm_user_assigned_identity" "aso" {
+  name                = "uami-aso-prod"
+  resource_group_name = azurerm_resource_group.prod.name
+  location            = azurerm_resource_group.prod.location
+}
+
+resource "azurerm_federated_identity_credential" "aso" {
+  name                = "aso-fedcred"
+  user_assigned_identity_id = azurerm_user_assigned_identity.aso.id
+  audience            = ["api://AzureADTokenExchange"]
+  issuer              = module.aks.oidc_issuer_url
+  subject             = "system:serviceaccount:azureserviceoperator-system:azureserviceoperator"
+}
+
+resource "azurerm_role_assignment" "aso_contributor" {
+  scope                = azurerm_resource_group.prod.id
+  role_definition_name = "Contributor"
+  principal_id         = azurerm_user_assigned_identity.aso.principal_id
+}
+
+# ESO
+
+resource "azurerm_user_assigned_identity" "eso" {
+  name                = "uami-eso-prod"
+  resource_group_name = azurerm_resource_group.prod.name
+  location            = azurerm_resource_group.prod.location
+}
+
+resource "azurerm_federated_identity_credential" "eso" {
+  name                = "eso-fedcred"
+  user_assigned_identity_id = azurerm_user_assigned_identity.eso.id
+  audience            = ["api://AzureADTokenExchange"]
+  issuer              = module.aks.oidc_issuer_url
+  subject             = "system:serviceaccount:external-secrets:external-secrets"
+}
+
+resource "azurerm_role_assignment" "eso_kv_secrets_user" {
+  scope                = data.terraform_remote_state.shared.outputs.key_vault_id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_user_assigned_identity.eso.principal_id
+}

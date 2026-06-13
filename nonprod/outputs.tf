@@ -33,3 +33,19 @@ output "cluster_ca_certificate" {
   value     = module.aks.cluster_ca_certificate
   sensitive = true
 }
+
+output "oidc_issuer_url" {
+  value = module.aks.oidc_issuer_url
+}
+
+output "aso_client_id" {
+  value = azurerm_user_assigned_identity.aso.client_id
+}
+
+output "eso_client_id" {
+  value = azurerm_user_assigned_identity.eso.client_id
+}
+
+output "key_vault_uri" {
+  value = data.terraform_remote_state.shared.outputs.key_vault_uri
+}

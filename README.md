@@ -77,7 +77,9 @@ task shared:apply
 ```
 
 ```bash
-az role assignment create --assignee $APP_ID --role "User Access Administrator" --scope "/subscriptions/$SUB_ID/resourceGroups/rg-shared/providers/Microsoft.ContainerRegistry/registries/<acr-name>
+az role assignment create --assignee $APP_ID --role "User Access Administrator" --scope "/subscriptions/$SUB_ID/resourceGroups/rg-shared
+az role assignment create --assignee $APP_ID --role "User Access Administrator" --scope "/subscriptions/$SUB_ID/resourceGroups/rg-prod
+az role assignment create --assignee $APP_ID --role "User Access Administrator" --scope "/subscriptions/$SUB_ID/resourceGroups/rg-nonprod
 ```
 
 ### Deploy Clusters

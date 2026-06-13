@@ -29,14 +29,14 @@ tasks:
       - tofu apply
 
   shared:plan:
-    desc: "Plan shared resources (ACR)"
+    desc: "Plan shared resources (ACR, Key Vault)"
     dir: shared
     cmds:
       - tofu init {{.BACKEND_ARGS}} -backend-config="key=shared/terraform.tfstate"
       - tofu plan
 
   shared:apply:
-    desc: "Apply shared resources (ACR)"
+    desc: "Apply shared resources (ACR, Key Vault)"
     dir: shared
     cmds:
       - tofu init {{.BACKEND_ARGS}} -backend-config="key=shared/terraform.tfstate"
@@ -109,7 +109,9 @@ tasks:
       - tofu apply
 
   up:
-    desc: "Provision everything from scratch: hub → shared → prod → nonprod → bootstrap"
+    desc: "Provision everything from scratch (non-interactive): hub → shared → prod → nonprod → bootstrap"
+    env:
+      TF_CLI_ARGS_apply: "-auto-approve"
     cmds:
       - task: hub:apply
       - task: shared:apply
