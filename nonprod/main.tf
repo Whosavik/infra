@@ -165,3 +165,9 @@ resource "azurerm_role_assignment" "cert_manager_dns" {
   role_definition_name = "DNS Zone Contributor"
   principal_id         = azurerm_user_assigned_identity.cert_manager.principal_id
 }
+
+resource "azurerm_role_assignment" "aks_network_contributor" {
+    scope                = azurerm_subnet.aks.id
+    role_definition_name = "Network Contributor"
+    principal_id         = module.aks.cluster_identity_principal_id
+}

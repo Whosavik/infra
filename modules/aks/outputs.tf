@@ -38,3 +38,7 @@ output "cluster_ca_certificate" {
 output "oidc_issuer_url" {
   value = azurerm_kubernetes_cluster.main.oidc_issuer_url
 }
+
+output "cluster_identity_principal_id" {
+  value = azurerm_kubernetes_cluster.main.identity[0].principal_id
+}
