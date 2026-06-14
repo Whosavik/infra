@@ -49,3 +49,23 @@ output "eso_client_id" {
 output "key_vault_uri" {
   value = data.terraform_remote_state.shared.outputs.key_vault_uri
 }
+
+output "cert_manager_client_id" {
+  value = azurerm_user_assigned_identity.cert_manager.client_id
+}
+
+output "dns_zone_name" {
+  value = azurerm_dns_zone.internal.name
+}
+
+output "dns_zone_resource_group" {
+  value = azurerm_resource_group.prod.name
+}
+
+output "zone_nameservers" {
+  value = azurerm_dns_zone.internal.name_servers
+}
+
+output "nginx_ilb_ip" {
+  value = var.nginx_ilb_ip
+}

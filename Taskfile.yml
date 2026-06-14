@@ -51,6 +51,8 @@ tasks:
       TF_VAR_max_nodes: "{{.PROD_MAX_NODES}}"
       TF_VAR_vnet_address_space: "{{.TF_VAR_prod_vnet_address_space}}"
       TF_VAR_node_subnet_prefix: "{{.TF_VAR_prod_node_subnet_prefix}}"
+      TF_VAR_cluster_subdomain: "{{.PROD_CLUSTER_SUBDOMAIN}}"
+      TF_VAR_nginx_ilb_ip: "{{.PROD_NGINX_ILB_IP}}"
     cmds:
       - tofu init {{.BACKEND_ARGS}} -backend-config="key=prod/terraform.tfstate"
       - tofu plan
@@ -64,6 +66,8 @@ tasks:
       TF_VAR_max_nodes: "{{.PROD_MAX_NODES}}"
       TF_VAR_vnet_address_space: "{{.TF_VAR_prod_vnet_address_space}}"
       TF_VAR_node_subnet_prefix: "{{.TF_VAR_prod_node_subnet_prefix}}"
+      TF_VAR_cluster_subdomain: "{{.PROD_CLUSTER_SUBDOMAIN}}"
+      TF_VAR_nginx_ilb_ip: "{{.PROD_NGINX_ILB_IP}}"
     cmds:
       - tofu init {{.BACKEND_ARGS}} -backend-config="key=prod/terraform.tfstate"
       - tofu apply
@@ -77,6 +81,8 @@ tasks:
       TF_VAR_max_nodes: "{{.NONPROD_MAX_NODES}}"
       TF_VAR_vnet_address_space: "{{.TF_VAR_nonprod_vnet_address_space}}"
       TF_VAR_node_subnet_prefix: "{{.TF_VAR_nonprod_node_subnet_prefix}}"
+      TF_VAR_cluster_subdomain: "{{.NONPROD_CLUSTER_SUBDOMAIN}}"
+      TF_VAR_nginx_ilb_ip: "{{.NONPROD_NGINX_ILB_IP}}"
     cmds:
       - tofu init {{.BACKEND_ARGS}} -backend-config="key=nonprod/terraform.tfstate"
       - tofu plan
@@ -90,6 +96,8 @@ tasks:
       TF_VAR_max_nodes: "{{.NONPROD_MAX_NODES}}"
       TF_VAR_vnet_address_space: "{{.TF_VAR_nonprod_vnet_address_space}}"
       TF_VAR_node_subnet_prefix: "{{.TF_VAR_nonprod_node_subnet_prefix}}"
+      TF_VAR_cluster_subdomain: "{{.NONPROD_CLUSTER_SUBDOMAIN}}"
+      TF_VAR_nginx_ilb_ip: "{{.NONPROD_NGINX_ILB_IP}}"
     cmds:
       - tofu init {{.BACKEND_ARGS}} -backend-config="key=nonprod/terraform.tfstate"
       - tofu apply
@@ -108,6 +116,19 @@ tasks:
       - tofu init {{.BACKEND_ARGS}} -backend-config="key=bootstrap/terraform.tfstate"
       - tofu apply
 
+  dns:nameservers:
+    desc: "Print the NS records to delegate at your registrar"
+    cmds:
+      - |
+        printf "\n================================================================\n"
+        printf "DNS delegations to add at your {{.TF_VAR_parent_domain}} registrar\n"
+        printf "================================================================\n"
+        printf "\n{{.NONPROD_CLUSTER_SUBDOMAIN}}.internal.{{.TF_VAR_parent_domain}}:\n"
+        cd nonprod && tofu output zone_nameservers
+        printf "\n{{.PROD_CLUSTER_SUBDOMAIN}}.internal.{{.TF_VAR_parent_domain}}:\n"
+        cd ../prod && tofu output zone_nameservers
+        printf "\n"
+
   up:
     desc: "Provision everything from scratch (non-interactive): hub → shared → prod → nonprod → bootstrap"
     env:
@@ -118,6 +139,7 @@ tasks:
       - task: prod:apply
       - task: nonprod:apply
       - task: bootstrap:apply
+      - task: dns:nameservers
 
   nonprod:destroy:
     desc: "Destroy the nonprod AKS cluster (does not touch prod or shared resources)"
@@ -129,6 +151,8 @@ tasks:
       TF_VAR_max_nodes: "{{.NONPROD_MAX_NODES}}"
       TF_VAR_vnet_address_space: "{{.TF_VAR_nonprod_vnet_address_space}}"
       TF_VAR_node_subnet_prefix: "{{.TF_VAR_nonprod_node_subnet_prefix}}"
+      TF_VAR_cluster_subdomain: "{{.NONPROD_CLUSTER_SUBDOMAIN}}"
+      TF_VAR_nginx_ilb_ip: "{{.NONPROD_NGINX_ILB_IP}}"
     cmds:
       - tofu init {{.BACKEND_ARGS}} -backend-config="key=nonprod/terraform.tfstate"
       - tofu destroy

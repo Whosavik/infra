@@ -41,3 +41,19 @@ variable "backend_sa" {
 variable "backend_container" {
   type = string
 }
+
+variable "parent_domain" {
+  type        = string
+  description = "Root domain, e.g. busstop.dev"
+}
+
+variable "cluster_subdomain" {
+  type        = string
+  description = "Cluster subdomain prefix, e.g. nonprod"
+}
+
+variable "nginx_ilb_ip" {
+  type        = string
+  default     = ""
+  description = "Private IP of the nginx ILB; set after nginx deploys to create the DNS A record"
+}

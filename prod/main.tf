@@ -123,3 +123,45 @@ resource "azurerm_role_assignment" "eso_kv_secrets_user" {
   role_definition_name = "Key Vault Secrets User"
   principal_id         = azurerm_user_assigned_identity.eso.principal_id
 }
+
+# DNS
+
+locals {
+  internal_zone = "${var.cluster_subdomain}.internal.${var.parent_domain}"
+}
+
+resource "azurerm_dns_zone" "internal" {
+  name                = local.internal_zone
+  resource_group_name = azurerm_resource_group.prod.name
+}
+
+resource "azurerm_dns_a_record" "wildcard" {
+  count               = var.nginx_ilb_ip != "" ? 1 : 0
+  name                = "*"
+  zone_name           = azurerm_dns_zone.internal.name
+  resource_group_name = azurerm_resource_group.prod.name
+  ttl                 = 300
+  records             = [var.nginx_ilb_ip]
+}
+
+# cert-manager
+
+resource "azurerm_user_assigned_identity" "cert_manager" {
+  name                = "uami-cert-manager-prod"
+  resource_group_name = azurerm_resource_group.prod.name
+  location            = azurerm_resource_group.prod.location
+}
+
+resource "azurerm_federated_identity_credential" "cert_manager" {
+  name                      = "cert-manager-fedcred"
+  user_assigned_identity_id = azurerm_user_assigned_identity.cert_manager.id
+  audience                  = ["api://AzureADTokenExchange"]
+  issuer                    = module.aks.oidc_issuer_url
+  subject                   = "system:serviceaccount:cert-manager:cert-manager"
+}
+
+resource "azurerm_role_assignment" "cert_manager_dns" {
+  scope                = azurerm_dns_zone.internal.id
+  role_definition_name = "DNS Zone Contributor"
+  principal_id         = azurerm_user_assigned_identity.cert_manager.principal_id
+}
