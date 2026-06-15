@@ -1,6 +1,6 @@
 variable "namespace_name" {
   type    = string
-  default = "flux-system"
+  default = "argocd"
 }
 
 variable "acr_host" {
