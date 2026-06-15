@@ -116,6 +116,34 @@ tasks:
       - tofu init {{.BACKEND_ARGS}} -backend-config="key=bootstrap/terraform.tfstate"
       - tofu apply
 
+  bootstrap:nonprod:plan:
+    desc: "Plan flux-system namespace and cluster-vars ConfigMap on nonprod only"
+    dir: bootstrap
+    cmds:
+      - tofu init {{.BACKEND_ARGS}} -backend-config="key=bootstrap/terraform.tfstate"
+      - tofu plan -target=module.bootstrap_nonprod
+
+  bootstrap:nonprod:apply:
+    desc: "Apply flux-system namespace and cluster-vars ConfigMap on nonprod only"
+    dir: bootstrap
+    cmds:
+      - tofu init {{.BACKEND_ARGS}} -backend-config="key=bootstrap/terraform.tfstate"
+      - tofu apply -target=module.bootstrap_nonprod
+
+  bootstrap:prod:plan:
+    desc: "Plan flux-system namespace and cluster-vars ConfigMap on prod only"
+    dir: bootstrap
+    cmds:
+      - tofu init {{.BACKEND_ARGS}} -backend-config="key=bootstrap/terraform.tfstate"
+      - tofu plan -target=module.bootstrap_prod
+
+  bootstrap:prod:apply:
+    desc: "Apply flux-system namespace and cluster-vars ConfigMap on prod only"
+    dir: bootstrap
+    cmds:
+      - tofu init {{.BACKEND_ARGS}} -backend-config="key=bootstrap/terraform.tfstate"
+      - tofu apply -target=module.bootstrap_prod
+
   dns:nameservers:
     desc: "Print the NS records to delegate at your registrar"
     cmds:
@@ -125,12 +153,12 @@ tasks:
         printf "================================================================\n"
         printf "\n{{.NONPROD_CLUSTER_SUBDOMAIN}}.internal.{{.TF_VAR_parent_domain}}:\n"
         cd nonprod && tofu output zone_nameservers
-        printf "\n{{.PROD_CLUSTER_SUBDOMAIN}}.internal.{{.TF_VAR_parent_domain}}:\n"
-        cd ../prod && tofu output zone_nameservers
+        # printf "\n{{.PROD_CLUSTER_SUBDOMAIN}}.internal.{{.TF_VAR_parent_domain}}:\n"
+        # cd ../prod && tofu output zone_nameservers
         printf "\n"
 
   up:
-    desc: "Provision everything from scratch (non-interactive): hub → shared → prod → nonprod → bootstrap"
+    desc: "Provision everything from scratch (non-interactive)"
     env:
       TF_CLI_ARGS_apply: "-auto-approve"
     cmds:
@@ -138,7 +166,7 @@ tasks:
       - task: shared:apply
     # - task: prod:apply
       - task: nonprod:apply
-      - task: bootstrap:apply
+      - task: bootstrap:nonprod:apply
       - task: dns:nameservers
 
   nonprod:destroy:

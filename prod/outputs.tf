@@ -1,9 +1,9 @@
 output "cluster_name" {
-  value = module.aks.cluster_name
+  value = module.cluster.cluster_name
 }
 
 output "resource_group_name" {
-  value = azurerm_resource_group.prod.name
+  value = module.cluster.resource_group_name
 }
 
 output "acr_login_server" {
@@ -11,39 +11,39 @@ output "acr_login_server" {
 }
 
 output "location" {
-  value = azurerm_resource_group.prod.location
+  value = module.cluster.location
 }
 
 output "host" {
-  value     = module.aks.host
+  value     = module.cluster.host
   sensitive = true
 }
 
 output "client_certificate" {
-  value     = module.aks.client_certificate
+  value     = module.cluster.client_certificate
   sensitive = true
 }
 
 output "client_key" {
-  value     = module.aks.client_key
+  value     = module.cluster.client_key
   sensitive = true
 }
 
 output "cluster_ca_certificate" {
-  value     = module.aks.cluster_ca_certificate
+  value     = module.cluster.cluster_ca_certificate
   sensitive = true
 }
 
 output "oidc_issuer_url" {
-  value = module.aks.oidc_issuer_url
+  value = module.cluster.oidc_issuer_url
 }
 
 output "aso_client_id" {
-  value = azurerm_user_assigned_identity.aso.client_id
+  value = module.cluster.aso_client_id
 }
 
 output "eso_client_id" {
-  value = azurerm_user_assigned_identity.eso.client_id
+  value = module.cluster.eso_client_id
 }
 
 output "key_vault_uri" {
@@ -51,21 +51,21 @@ output "key_vault_uri" {
 }
 
 output "cert_manager_client_id" {
-  value = azurerm_user_assigned_identity.cert_manager.client_id
+  value = module.cluster.cert_manager_client_id
 }
 
 output "dns_zone_name" {
-  value = azurerm_dns_zone.internal.name
+  value = module.cluster.dns_zone_name
 }
 
 output "dns_zone_resource_group" {
-  value = azurerm_resource_group.prod.name
+  value = module.cluster.dns_zone_resource_group
 }
 
 output "zone_nameservers" {
-  value = azurerm_dns_zone.internal.name_servers
+  value = module.cluster.zone_nameservers
 }
 
 output "nginx_ilb_ip" {
-  value = var.nginx_ilb_ip
+  value = module.cluster.nginx_ilb_ip
 }

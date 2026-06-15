@@ -22,60 +22,40 @@ data "terraform_remote_state" "prod" {
 
 # ── nonprod ──────────────────────────────────────────────────────────────────
 
-resource "kubernetes_namespace" "ns_nonprod" {
-  provider = kubernetes.nonprod
-}
+module "bootstrap_nonprod" {
+  source    = "../modules/cluster-bootstrap"
+  providers = { kubernetes = kubernetes.nonprod }
 
-resource "kubernetes_config_map" "cluster_vars_nonprod" {
-  provider = kubernetes.nonprod
-
-  metadata {
-    name      = "cluster-vars"
-    namespace = kubernetes_namespace.ns_nonprod.metadata[0].name
-  }
-
-  data = {
-    ACR_HOST              = data.terraform_remote_state.nonprod.outputs.acr_login_server
-    AZURE_SUBSCRIPTION_ID = data.azurerm_client_config.current.subscription_id
-    AZURE_TENANT_ID       = data.azurerm_client_config.current.tenant_id
-    AZURE_RESOURCE_GROUP  = data.terraform_remote_state.nonprod.outputs.resource_group_name
-    AZURE_LOCATION        = data.terraform_remote_state.nonprod.outputs.location
-    ASO_CLIENT_ID           = data.terraform_remote_state.nonprod.outputs.aso_client_id
-    ESO_CLIENT_ID           = data.terraform_remote_state.nonprod.outputs.eso_client_id
-    KEY_VAULT_URI           = data.terraform_remote_state.nonprod.outputs.key_vault_uri
-    CERT_MANAGER_CLIENT_ID  = data.terraform_remote_state.nonprod.outputs.cert_manager_client_id
-    DNS_ZONE_NAME           = data.terraform_remote_state.nonprod.outputs.dns_zone_name
-    DNS_ZONE_RESOURCE_GROUP = data.terraform_remote_state.nonprod.outputs.dns_zone_resource_group
-    NGINX_ILB_IP            = data.terraform_remote_state.nonprod.outputs.nginx_ilb_ip
-  }
+  subscription_id         = data.azurerm_client_config.current.subscription_id
+  tenant_id               = data.azurerm_client_config.current.tenant_id
+  acr_host                = data.terraform_remote_state.nonprod.outputs.acr_login_server
+  resource_group_name     = data.terraform_remote_state.nonprod.outputs.resource_group_name
+  location                = data.terraform_remote_state.nonprod.outputs.location
+  aso_client_id           = data.terraform_remote_state.nonprod.outputs.aso_client_id
+  eso_client_id           = data.terraform_remote_state.nonprod.outputs.eso_client_id
+  key_vault_uri           = data.terraform_remote_state.nonprod.outputs.key_vault_uri
+  cert_manager_client_id  = data.terraform_remote_state.nonprod.outputs.cert_manager_client_id
+  dns_zone_name           = data.terraform_remote_state.nonprod.outputs.dns_zone_name
+  dns_zone_resource_group = data.terraform_remote_state.nonprod.outputs.dns_zone_resource_group
+  nginx_ilb_ip            = data.terraform_remote_state.nonprod.outputs.nginx_ilb_ip
 }
 
 # ── prod ─────────────────────────────────────────────────────────────────────
 
-resource "kubernetes_namespace" "ns_prod" {
-  provider = kubernetes.prod
-}
+module "bootstrap_prod" {
+  source    = "../modules/cluster-bootstrap"
+  providers = { kubernetes = kubernetes.prod }
 
-resource "kubernetes_config_map" "cluster_vars_prod" {
-  provider = kubernetes.prod
-
-  metadata {
-    name      = "cluster-vars"
-    namespace = kubernetes_namespace.ns_prod.metadata[0].name
-  }
-
-  data = {
-    ACR_HOST                = data.terraform_remote_state.prod.outputs.acr_login_server
-    AZURE_SUBSCRIPTION_ID   = data.azurerm_client_config.current.subscription_id
-    AZURE_TENANT_ID         = data.azurerm_client_config.current.tenant_id
-    AZURE_RESOURCE_GROUP    = data.terraform_remote_state.prod.outputs.resource_group_name
-    AZURE_LOCATION          = data.terraform_remote_state.prod.outputs.location
-    ASO_CLIENT_ID           = data.terraform_remote_state.prod.outputs.aso_client_id
-    ESO_CLIENT_ID           = data.terraform_remote_state.prod.outputs.eso_client_id
-    KEY_VAULT_URI           = data.terraform_remote_state.prod.outputs.key_vault_uri
-    CERT_MANAGER_CLIENT_ID  = data.terraform_remote_state.prod.outputs.cert_manager_client_id
-    DNS_ZONE_NAME           = data.terraform_remote_state.prod.outputs.dns_zone_name
-    DNS_ZONE_RESOURCE_GROUP = data.terraform_remote_state.prod.outputs.dns_zone_resource_group
-    NGINX_ILB_IP            = data.terraform_remote_state.prod.outputs.nginx_ilb_ip
-  }
+  subscription_id         = data.azurerm_client_config.current.subscription_id
+  tenant_id               = data.azurerm_client_config.current.tenant_id
+  acr_host                = data.terraform_remote_state.prod.outputs.acr_login_server
+  resource_group_name     = data.terraform_remote_state.prod.outputs.resource_group_name
+  location                = data.terraform_remote_state.prod.outputs.location
+  aso_client_id           = data.terraform_remote_state.prod.outputs.aso_client_id
+  eso_client_id           = data.terraform_remote_state.prod.outputs.eso_client_id
+  key_vault_uri           = data.terraform_remote_state.prod.outputs.key_vault_uri
+  cert_manager_client_id  = data.terraform_remote_state.prod.outputs.cert_manager_client_id
+  dns_zone_name           = data.terraform_remote_state.prod.outputs.dns_zone_name
+  dns_zone_resource_group = data.terraform_remote_state.prod.outputs.dns_zone_resource_group
+  nginx_ilb_ip            = data.terraform_remote_state.prod.outputs.nginx_ilb_ip
 }
