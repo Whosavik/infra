@@ -136,7 +136,7 @@ tasks:
     cmds:
       - task: hub:apply
       - task: shared:apply
-      - task: prod:apply
+    # - task: prod:apply
       - task: nonprod:apply
       - task: bootstrap:apply
       - task: dns:nameservers
@@ -155,4 +155,20 @@ tasks:
       TF_VAR_nginx_ilb_ip: "{{.NONPROD_NGINX_ILB_IP}}"
     cmds:
       - tofu init {{.BACKEND_ARGS}} -backend-config="key=nonprod/terraform.tfstate"
+      - tofu destroy
+
+  prod:destroy:
+    desc: "Destroy the prod AKS cluster"
+    prompt: "This will destroy the prod cluster and its spoke VNet. Continue?"
+    dir: prod
+    env:
+      TF_VAR_vm_size: "{{.PROD_VM_SIZE}}"
+      TF_VAR_min_nodes: "{{.PROD_MIN_NODES}}"
+      TF_VAR_max_nodes: "{{.PROD_MAX_NODES}}"
+      TF_VAR_vnet_address_space: "{{.TF_VAR_prod_vnet_address_space}}"
+      TF_VAR_node_subnet_prefix: "{{.TF_VAR_prod_node_subnet_prefix}}"
+      TF_VAR_cluster_subdomain: "{{.PROD_CLUSTER_SUBDOMAIN}}"
+      TF_VAR_nginx_ilb_ip: "{{.PROD_NGINX_ILB_IP}}"
+    cmds:
+      - tofu init {{.BACKEND_ARGS}} -backend-config="key=prod/terraform.tfstate"
       - tofu destroy

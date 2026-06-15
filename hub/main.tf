@@ -35,17 +35,3 @@ resource "azurerm_private_dns_resolver_inbound_endpoint" "main" {
     subnet_id                    = azurerm_subnet.resolver.id
   }
 }
-
-data "azurerm_private_dns_zone" "zones" {
-  for_each = toset(var.private_dns_zone_names)
-  name     = each.key
-}
-
-resource "azurerm_private_dns_zone_virtual_network_link" "hub_links" {
-  for_each              = toset(var.private_dns_zone_names)
-  name                  = "link-hub-${replace(each.key, ".", "-")}"
-  resource_group_name   = data.azurerm_private_dns_zone.zones[each.key].resource_group_name
-  private_dns_zone_name = each.key
-  virtual_network_id    = data.azurerm_virtual_network.hub.id
-  registration_enabled  = false
-}

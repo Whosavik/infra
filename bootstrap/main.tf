@@ -22,16 +22,8 @@ data "terraform_remote_state" "prod" {
 
 # ── nonprod ──────────────────────────────────────────────────────────────────
 
-resource "kubernetes_namespace" "flux_system_nonprod" {
+resource "kubernetes_namespace" "ns_nonprod" {
   provider = kubernetes.nonprod
-
-  metadata {
-    name = "flux-system"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
 }
 
 resource "kubernetes_config_map" "cluster_vars_nonprod" {
@@ -39,7 +31,7 @@ resource "kubernetes_config_map" "cluster_vars_nonprod" {
 
   metadata {
     name      = "cluster-vars"
-    namespace = kubernetes_namespace.flux_system_nonprod.metadata[0].name
+    namespace = kubernetes_namespace.ns_nonprod.metadata[0].name
   }
 
   data = {
@@ -60,16 +52,8 @@ resource "kubernetes_config_map" "cluster_vars_nonprod" {
 
 # ── prod ─────────────────────────────────────────────────────────────────────
 
-resource "kubernetes_namespace" "flux_system_prod" {
+resource "kubernetes_namespace" "ns_prod" {
   provider = kubernetes.prod
-
-  metadata {
-    name = "flux-system"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
 }
 
 resource "kubernetes_config_map" "cluster_vars_prod" {
@@ -77,7 +61,7 @@ resource "kubernetes_config_map" "cluster_vars_prod" {
 
   metadata {
     name      = "cluster-vars"
-    namespace = kubernetes_namespace.flux_system_prod.metadata[0].name
+    namespace = kubernetes_namespace.ns_prod.metadata[0].name
   }
 
   data = {
