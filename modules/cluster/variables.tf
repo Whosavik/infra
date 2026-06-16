@@ -65,3 +65,15 @@ variable "nginx_ilb_ip" {
   default     = ""
   description = "Private IP of the nginx ILB; set after nginx deploys to create the DNS A record"
 }
+
+variable "wireguard_vm_private_ip" {
+  type        = string
+  default     = ""
+  description = "Private IP of the hub WireGuard VM; when set, a route is added so the AKS subnet can reply to tunnel-sourced traffic"
+}
+
+variable "wireguard_tunnel_cidr" {
+  type        = string
+  default     = ""
+  description = "CIDR of the WireGuard tunnel network; routed back through wireguard_vm_private_ip"
+}

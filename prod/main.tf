@@ -36,4 +36,6 @@ module "cluster" {
   parent_domain           = var.parent_domain
   cluster_subdomain       = var.cluster_subdomain
   nginx_ilb_ip            = var.nginx_ilb_ip
+  wireguard_vm_private_ip = try(data.terraform_remote_state.hub.outputs.wireguard_vm_private_ip, "")
+  wireguard_tunnel_cidr   = var.wg_tunnel_cidr
 }

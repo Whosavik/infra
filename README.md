@@ -83,3 +83,53 @@ task nonprod:destroy
 
 This only removes the nonprod cluster and its spoke VNet. The ACR, hub resolver, and prod
 cluster are not affected.
+
+## Remote access via WireGuard
+
+Both spoke clusters have no public IPs. A small VM in the hub VNet (`task hub:apply`) terminates
+a WireGuard tunnel and routes into the hub, prod, and nonprod VNets, so it doubles as your way in.
+
+Terraform doesn't generate the keys — generate them yourself and put them in `.env`:
+
+```bash
+# Server keypair — the private key goes into .env (TF_VAR_wg_server_private_key).
+# The public key isn't needed by Terraform; you can discard it.
+wg genkey | tee wg-server-private.key | wg pubkey > wg-server-public.key
+
+# Client (your laptop) keypair — the private key stays on your laptop only.
+# The public key goes into .env (TF_VAR_wg_client_public_key).
+wg genkey | tee wg-client-private.key | wg pubkey > wg-client-public.key
+```
+
+Fill in `TF_VAR_hub_wireguard_subnet_prefix`, `TF_VAR_admin_ssh_public_key`, `TF_VAR_wg_tunnel_cidr`,
+`TF_VAR_wg_server_private_key`, `TF_VAR_wg_client_public_key`, and `TF_VAR_wg_client_tunnel_ip` in
+`.env` (see `.env.example`), then:
+
+```bash
+task hub:apply
+task nonprod:apply   # and/or task prod:apply — adds the return route for each spoke
+```
+
+Get the VM's public key and endpoint, then bring up the tunnel from your laptop:
+
+```bash
+ssh azureuser@$(cd hub && tofu output -raw wireguard_vm_public_ip) sudo wg show wg0 public-key
+```
+
+Client `wg0.conf`:
+
+```ini
+[Interface]
+PrivateKey = <contents of wg-client-private.key>
+Address = <TF_VAR_wg_client_tunnel_ip without the /32, e.g. 10.200.0.2/32>
+
+[Peer]
+PublicKey = <public key printed by the ssh command above>
+Endpoint = <tofu output -raw wireguard_vm_public_ip (hub)>:51820
+AllowedIPs = <TF_VAR_wg_tunnel_cidr>,<TF_VAR_prod_vnet_address_space>,<TF_VAR_nonprod_vnet_address_space>
+PersistentKeepalive = 25
+```
+
+```bash
+wg-quick up ./wg0.conf
+```

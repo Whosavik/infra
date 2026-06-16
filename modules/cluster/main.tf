@@ -151,3 +151,28 @@ resource "azurerm_role_assignment" "aks_network_contributor" {
   role_definition_name = "Network Contributor"
   principal_id         = module.aks.cluster_identity_principal_id
 }
+
+# WireGuard transit route
+
+resource "azurerm_route_table" "wireguard" {
+  count               = var.wireguard_vm_private_ip != "" ? 1 : 0
+  name                = "rt-wireguard-${var.environment}"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+}
+
+resource "azurerm_route" "wireguard_tunnel" {
+  count                  = var.wireguard_vm_private_ip != "" ? 1 : 0
+  name                   = "wireguard-tunnel"
+  resource_group_name    = azurerm_resource_group.main.name
+  route_table_name       = azurerm_route_table.wireguard[0].name
+  address_prefix         = var.wireguard_tunnel_cidr
+  next_hop_type          = "VirtualAppliance"
+  next_hop_in_ip_address = var.wireguard_vm_private_ip
+}
+
+resource "azurerm_subnet_route_table_association" "wireguard" {
+  count          = var.wireguard_vm_private_ip != "" ? 1 : 0
+  subnet_id      = azurerm_subnet.aks.id
+  route_table_id = azurerm_route_table.wireguard[0].id
+}

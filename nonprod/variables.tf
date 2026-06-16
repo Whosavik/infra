@@ -57,3 +57,9 @@ variable "nginx_ilb_ip" {
   default     = ""
   description = "Private IP of the nginx ILB; set after nginx deploys to create the DNS A record"
 }
+
+variable "wg_tunnel_cidr" {
+  type        = string
+  default     = ""
+  description = "CIDR of the WireGuard tunnel network; routed back through the hub WireGuard VM"
+}
