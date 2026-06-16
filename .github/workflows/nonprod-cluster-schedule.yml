@@ -1,0 +1,62 @@
+name: Nonprod cluster scale-to-zero schedule
+
+on:
+  # schedule:
+    # Runs hourly; the job itself decides whether to act, based on
+    # Melbourne local time so it stays correct across DST changes.
+    # - cron: "0 * * * *"
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Force an action instead of using the schedule check"
+        type: choice
+        options: [stop, start]
+        required: true
+
+env:
+  RESOURCE_GROUP: rg-nonprod
+  CLUSTER_NAME: aks-nonprod
+  TZ_NAME: Australia/Melbourne
+
+jobs:
+  scale:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine action
+        id: decide
+        run: |
+          if [ -n "${{ inputs.action }}" ]; then
+            echo "action=${{ inputs.action }}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          hour=$(TZ="$TZ_NAME" date +%H)
+          weekday=$(TZ="$TZ_NAME" date +%u) # 1=Mon .. 7=Sun
+
+          if [ "$weekday" -ge 1 ] && [ "$weekday" -le 5 ] && [ "$hour" = "19" ]; then
+            echo "action=stop" >> "$GITHUB_OUTPUT"
+          elif [ "$weekday" -ge 1 ] && [ "$weekday" -le 5 ] && [ "$hour" = "07" ]; then
+            echo "action=start" >> "$GITHUB_OUTPUT"
+          else
+            echo "action=none" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Log in to Azure
+        if: steps.decide.outputs.action != 'none'
+        uses: azure/login@v2
+        with:
+          creds: >-
+            {
+              "clientId": "${{ secrets.ARM_CLIENT_ID }}",
+              "clientSecret": "${{ secrets.ARM_CLIENT_SECRET }}",
+              "tenantId": "${{ secrets.ARM_TENANT_ID }}",
+              "subscriptionId": "${{ secrets.ARM_SUBSCRIPTION_ID }}"
+            }
+
+      - name: Stop cluster
+        if: steps.decide.outputs.action == 'stop'
+        run: az aks stop --resource-group "$RESOURCE_GROUP" --name "$CLUSTER_NAME"
+
+      - name: Start cluster
+        if: steps.decide.outputs.action == 'start'
+        run: az aks start --resource-group "$RESOURCE_GROUP" --name "$CLUSTER_NAME"
