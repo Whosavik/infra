@@ -61,18 +61,18 @@ This will fail on the first run, because our identity doesn't have role assignme
 
 ```bash
 az role assignment create --assignee $APP_ID --role "User Access Administrator" --scope "/subscriptions/$SUB_ID/resourceGroups/rg-shared
-az role assignment create --assignee $APP_ID --role "User Access Administrator" --scope "/subscriptions/$SUB_ID/resourceGroups/rg-prod
-az role assignment create --assignee $APP_ID --role "User Access Administrator" --scope "/subscriptions/$SUB_ID/resourceGroups/rg-nonprod
+az role assignment create --assignee $APP_ID --role "User Access Administrator" --scope "/subscriptions/$SUB_ID/resourceGroups/cc-rg-prod
+az role assignment create --assignee $APP_ID --role "User Access Administrator" --scope "/subscriptions/$SUB_ID/resourceGroups/cc-rg-nonprod
 ```
 
 ## Getting kubeconfig
 
 ```bash
 # Prod
-az aks get-credentials --resource-group rg-prod --name aks-prod
+az aks get-credentials --resource-group cc-rg-prod --name aks-prod
 
 # Nonprod
-az aks get-credentials --resource-group rg-nonprod --name aks-nonprod
+az aks get-credentials --resource-group cc-rg-nonprod --name aks-nonprod
 ```
 
 ### Destroying nonprod

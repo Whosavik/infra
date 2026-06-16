@@ -4,7 +4,7 @@ data "azurerm_virtual_network" "hub" {
 }
 
 resource "azurerm_resource_group" "main" {
-  name     = "rg-${var.environment}"
+  name     = "cc-rg-${var.environment}"
   location = var.location
 }
 

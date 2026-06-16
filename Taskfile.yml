@@ -26,7 +26,7 @@ tasks:
     dir: hub
     cmds:
       - tofu init {{.BACKEND_ARGS}} -backend-config="key=hub/terraform.tfstate"
-      - tofu apply
+      - tofu apply -auto-approve
 
   shared:plan:
     desc: "Plan shared resources (ACR, Key Vault)"
@@ -40,7 +40,7 @@ tasks:
     dir: shared
     cmds:
       - tofu init {{.BACKEND_ARGS}} -backend-config="key=shared/terraform.tfstate"
-      - tofu apply
+      - tofu apply -auto-approve
 
   prod:plan:
     desc: "Plan prod AKS cluster and spoke VNet"
@@ -70,7 +70,7 @@ tasks:
       TF_VAR_nginx_ilb_ip: "{{.PROD_NGINX_ILB_IP}}"
     cmds:
       - tofu init {{.BACKEND_ARGS}} -backend-config="key=prod/terraform.tfstate"
-      - tofu apply
+      - tofu apply -auto-approve
 
   nonprod:plan:
     desc: "Plan nonprod AKS cluster and spoke VNet"
@@ -100,7 +100,7 @@ tasks:
       TF_VAR_nginx_ilb_ip: "{{.NONPROD_NGINX_ILB_IP}}"
     cmds:
       - tofu init {{.BACKEND_ARGS}} -backend-config="key=nonprod/terraform.tfstate"
-      - tofu apply
+      - tofu apply -auto-approve
 
   bootstrap:plan:
     desc: "Plan flux-system namespace and cluster-vars ConfigMap on prod and nonprod"
@@ -114,21 +114,21 @@ tasks:
     dir: bootstrap
     cmds:
       - tofu init {{.BACKEND_ARGS}} -backend-config="key=bootstrap/terraform.tfstate"
-      - tofu apply
+      - tofu apply -auto-approve
 
   bootstrap:nonprod:plan:
     desc: "Plan flux-system namespace and cluster-vars ConfigMap on nonprod only"
     dir: bootstrap
     cmds:
       - tofu init {{.BACKEND_ARGS}} -backend-config="key=bootstrap/terraform.tfstate"
-      - tofu plan -target=module.bootstrap_nonprod
+      - tofu plan -target=module.bootstrap_nonprod -auto-approve
 
   bootstrap:nonprod:apply:
     desc: "Apply flux-system namespace and cluster-vars ConfigMap on nonprod only"
     dir: bootstrap
     cmds:
       - tofu init {{.BACKEND_ARGS}} -backend-config="key=bootstrap/terraform.tfstate"
-      - tofu apply -target=module.bootstrap_nonprod
+      - tofu apply -target=module.bootstrap_nonprod -auto-approve
 
   bootstrap:prod:plan:
     desc: "Plan flux-system namespace and cluster-vars ConfigMap on prod only"
@@ -142,7 +142,7 @@ tasks:
     dir: bootstrap
     cmds:
       - tofu init {{.BACKEND_ARGS}} -backend-config="key=bootstrap/terraform.tfstate"
-      - tofu apply -target=module.bootstrap_prod
+      - tofu apply -target=module.bootstrap_prod -auto-approve
 
   dns:nameservers:
     desc: "Print the NS records to delegate at your registrar"
